@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* ONE palette, this file.
+ *
+ * Paper, not screen. The output is a page of prose somebody is meant to read
+ * twice and then act on, and every previous site this week has been dark.
+ *
+ * Contrast measured against BOTH surfaces text actually sits on — the page
+ * (#f3f0e9) and the input field (#fbf9f4), in that order:
+ *   ink   #17150f   16.0 : 1   17.4 : 1
+ *   muted #5e574a    6.3 : 1    6.8 : 1
+ *   faint #6f6656    5.0 : 1    5.4 : 1
+ *   kill  #9c3b22    6.0 : 1    6.5 : 1
+ * Paper on the kill button (#f6f2ea on #9c3b22) is 6.1 : 1.
+ *
+ * The first `faint` tried was #8a7f6a, which looked right and failed at
+ * 3.5 : 1. It is used for 11px uppercase labels, which are body text however
+ * small they are, so it had to clear 4.5 on the darker of the two grounds. */
+@theme {
+  --color-paper: #f3f0e9;
+  --color-field: #fbf9f4;
+  --color-rule: #ddd6c5;
+  --color-edge: #c9c2ae;
+  --color-ink: #17150f;
+  --color-muted: #5e574a;
+  --color-faint: #6f6656;
+  --color-kill: #9c3b22;
+  --color-kill-ink: #f6f2ea;
+
+  --font-display: var(--font-display-loaded), ui-serif, Georgia, serif;
+  --font-body: var(--font-body-loaded), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-loaded), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html, body { background: var(--color-paper); color: var(--color-ink); }
+body { font-family: var(--font-body); }
+
+::selection { background: #e8dcc4; color: var(--color-ink); }
+
+/* The report is meant to leave the screen. */
+@media print {
+  .no-print { display: none !important; }
+  html, body { background: #fff; }
+  main { max-width: none; padding: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise { animation: rise .45s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(5px); } }
+}
