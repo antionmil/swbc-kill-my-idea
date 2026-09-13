@@ -32,10 +32,10 @@ function logs for `[llm]`.
 
 | | |
 |---|---|
-| Input | ~745 tokens |
-| Output | ~1,700 tokens, of which ~1,100 is thinking |
-| Per answer | **$0.017** |
-| Daily ceiling of 400 answers | **$6.80** |
+| Input | ~815 tokens |
+| Output | ~1,560 tokens, of which ~890 is thinking |
+| Per answer | **$0.017** — measured in production, range $0.0155 to $0.0200 |
+| Daily ceiling of 400 answers | **$6.90** |
 
 ### Why effort is `medium`
 
