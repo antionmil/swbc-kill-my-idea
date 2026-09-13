@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "db:gen": "drizzle-kit generate",
     "build:check": "NEXT_DIST_DIR=.next-build next build",
-    "dev:webpack": "NODE_OPTIONS=--max-old-space-size=2048 next dev --webpack"
+    "dev:webpack": "NODE_OPTIONS=--max-old-space-size=2048 next dev --webpack",
+    "test:order": "node --experimental-strip-types --no-warnings qa/order.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

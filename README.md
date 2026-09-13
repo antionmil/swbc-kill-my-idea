@@ -109,6 +109,27 @@ uniqueness there is no conflict to catch, every count comes back as 1, and
 both limits silently never fire. That is day 1's rate limiter, which compiled,
 deployed, and did nothing.
 
+## The ordering is done in code, not by the model
+
+The page tells the reader the list runs cheapest first. Asking the model for
+that got it right most of the time, and most of the time is not something to
+print as a promise — a live answer put a one-hour test behind a two-hour one
+within an hour of shipping, on a sample of three that had come back clean.
+
+So the model now tags each experiment with what it depends on, and
+`src/lib/order.ts` does the sorting: a topological sort with cost as the
+tiebreak, prerequisites always ahead of the experiments that need them, and a
+circular dependency detected up front and answered by dropping the
+dependencies rather than half-applying them.
+
+An hour of your own time counts as $50 for ordering purposes only. There is no
+honest universal rate, so the number is stated rather than buried, and it
+never changes what an experiment says it costs — only where it sits.
+
+`pnpm test:order` covers the cases, including the live failure that prompted
+this and the awkward ones a model will eventually produce: a self-reference, a
+circle, and a dependency pointing at an experiment that does not exist.
+
 ## What comes back
 
 A verdict of at most fifteen words, five experiments ordered by cost, the

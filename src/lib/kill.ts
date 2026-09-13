@@ -1,4 +1,8 @@
 import { complete } from "./llm";
+import { order, type Experiment } from "./order";
+
+export type { Experiment } from "./order";
+export { costLabel } from "./order";
 
 /* The prompt.
  *
@@ -14,7 +18,8 @@ import { complete } from "./llm";
 const SYSTEM = `You design experiments that DISPROVE ideas. The person describing the idea has not built it yet.
 
 Rules, all binding:
-- Exactly five experiments, ordered by cost ascending. The cheapest must be doable in under two hours. An experiment that can only run on the results of an earlier one follows it, even if it is cheaper.
+- Exactly five experiments. The cheapest must be doable in under two hours. Do not worry about the order; each experiment carries a "needs" field and the ordering is done afterwards.
+- "needs" is the 1-based position of the experiment whose RESULTS this one requires — the people it recruits, the list it produces — or null. Most experiments are independent. Use it only when the experiment genuinely cannot run on its own.
 - Every experiment names a falsifying result AS A NUMBER. "Fewer than 5 of 50 reply", never "low interest".
 - Prefer experiments that need no product at all.
 - NEVER suggest building an MVP, a prototype, a waitlist page, or "just launch and see". Those are the thing being tested, not a test of it.
@@ -29,9 +34,8 @@ Two closing fields:
 - "sharper": ONE narrower version of the idea that the same experiments would have an easier time proving. Name the specific change and, in the same breath, why it is easier to prove — a named customer, a named moment, a smaller promise. Never "niche down", never "talk to more users", never a second idea in disguise. If the idea is already as tightly aimed as it can be, set it to null and do not invent one.
 
 Return ONLY minified JSON, no code fence:
-{"verdict":string,"assumption":string,"experiments":[{"action":string,"hours":number,"money":number,"kills":string}],"summary":string,"sharper":string|null,"refused":string|null}`;
+{"verdict":string,"assumption":string,"experiments":[{"action":string,"hours":number,"money":number,"kills":string,"needs":number|null}],"summary":string,"sharper":string|null,"refused":string|null}`;
 
-export type Experiment = { action: string; hours: number; money: number; kills: string };
 export type Kill = {
   verdict: string;
   assumption: string;
@@ -45,12 +49,6 @@ export class NotAnIdea extends Error {}
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : 0);
-
-/** Cost as a person reads it: "2 hours", "10 hours · $150". */
-export function costLabel(e: Experiment) {
-  const h = e.hours === 1 ? "1 hour" : `${e.hours % 1 ? e.hours.toFixed(1) : e.hours} hours`;
-  return e.money > 0 ? `${h} · $${e.money.toLocaleString("en-US")}` : h;
-}
 
 function parse(raw: string): Kill {
   const text = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
@@ -67,7 +65,14 @@ function parse(raw: string): Kill {
   const experiments = (Array.isArray(data.experiments) ? data.experiments : [])
     .map((e) => {
       const x = e as Record<string, unknown>;
-      return { action: str(x.action), hours: num(x.hours), money: num(x.money), kills: str(x.kills) };
+      const needs = typeof x.needs === "number" && Number.isInteger(x.needs) ? x.needs : null;
+      return {
+        action: str(x.action),
+        hours: num(x.hours),
+        money: num(x.money),
+        kills: str(x.kills),
+        needs,
+      };
     })
     .filter((e) => e.action && e.kills)
     .slice(0, 5);
@@ -79,7 +84,7 @@ function parse(raw: string): Kill {
   return {
     verdict,
     assumption: str(data.assumption),
-    experiments,
+    experiments: order(experiments),
     summary: str(data.summary),
     /* The model is told to return null rather than invent one. It sometimes
        returns the string "null" instead, which would print on the page. */
