@@ -94,6 +94,23 @@ export async function killIdea(idea: string): Promise<Kill> {
   const raw = await complete(`The idea:\n\n${idea}`, {
     job: "prose",
     system: SYSTEM,
+    /* MEDIUM, measured rather than assumed.
+     *
+     * Thinking is billed as output and was three quarters of the bill at the
+     * default effort. Three ideas were run at every level and the output
+     * audited against the contract this page promises: cost ascending, a
+     * number in every kill, nothing that says build it.
+     *
+     *   high (was shipped)  $0.0295   clean
+     *   medium              $0.0161   clean          <- here
+     *   low                 $0.0087   3 breaks, one of them "run ads"
+     *   no thinking         $0.0090   1 break
+     *   haiku, no thinking  $0.0043   3 breaks, and it cited a dead company
+     *
+     * The breaks below medium are the ordering going wrong in the middle of
+     * the list, which is the one thing the page tells the reader it has done
+     * for them. Re-measure before moving this. */
+    effort: "medium",
     maxTokens: 5000,
     maxInputChars: 4000,
     /* Caching is owned by the route, not by this call, so a description that

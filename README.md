@@ -26,19 +26,41 @@ cheap disproof plan. That gap is the whole product.
 
 ## What an answer costs
 
-Measured, not estimated: three runs of the real system prompt through
-`claude-sonnet-5` at $2 per million input tokens and $10 per million output.
+Measured, not estimated. `claude-sonnet-5` at $2 per million input tokens and
+$10 per million output, and every call logs its own usage and cost - grep the
+function logs for `[llm]`.
 
 | | |
 |---|---|
-| Input | ~739 tokens |
-| Output | ~2,733 tokens, of which ~2,050 is thinking |
-| Per answer | **$0.029** |
-| Daily ceiling of 400 answers | **$11.52** |
+| Input | ~745 tokens |
+| Output | ~1,700 tokens, of which ~1,100 is thinking |
+| Per answer | **$0.017** |
+| Daily ceiling of 400 answers | **$6.80** |
 
-Thinking is most of the bill. The cache is the other half of the cost story: a
-description that has been asked before costs nothing and does not spend one of
-the visitor's three goes.
+### Why effort is `medium`
+
+Thinking is billed as output and was three quarters of the bill at the default
+effort. Three ideas were run at every level and each answer audited against
+the contract the page promises - cost ascending through the list, a number in
+every falsifying result, nothing that amounts to "build it and see":
+
+| Setting | Per answer | Audit |
+|---|---|---|
+| Sonnet, high (the default) | $0.0295 | clean |
+| **Sonnet, medium** | **$0.0161** | **clean** |
+| Sonnet, low | $0.0087 | 3 breaks, one of them "run $150 of ads" |
+| Sonnet, no thinking | $0.0090 | 1 break |
+| Haiku, no thinking | $0.0043 | 3 breaks, and it cited a company that shut down |
+
+Every break below medium was the ordering going wrong in the MIDDLE of the
+list, which is the one thing the page tells the reader it has done for them.
+Medium also halved the wait, from about 35 seconds to about 20.
+
+Prompt caching is not a lever here and was checked rather than assumed: the
+system prompt is around 500 tokens, below the minimum cacheable prefix, and
+input is under a tenth of the bill either way. The cache that does matter is
+the week-long one on whole answers - a description asked before costs nothing
+and does not spend one of the visitor's three goes.
 
 ## The three numbers at the foot of the page
 

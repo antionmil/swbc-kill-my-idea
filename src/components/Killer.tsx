@@ -30,8 +30,9 @@ export function Killer() {
     const text = idea.trim();
     if (text.length < 25 || state.at === "working") return;
     setState({ at: "working" });
-    /* Measured at about 35 seconds. A spinner that says nothing for that long
-       reads as broken, so the line under the button counts. */
+    /* About 20 seconds at medium effort, down from 35 at the default. A
+       spinner that says nothing for that long still reads as broken, so the
+       line under the button counts. */
     setWaited(0);
     const tick = setInterval(() => setWaited((n) => n + 1), 1000);
     try {
@@ -110,9 +111,9 @@ export function Killer() {
             </button>
             <span className="text-[13px] text-faint">
               {state.at === "working"
-                ? waited < 10
-                  ? "About half a minute. It is writing, not looking anything up."
-                  : waited < 25
+                ? waited < 8
+                  ? "About twenty seconds. It is writing, not looking anything up."
+                  : waited < 20
                     ? `Still writing — ${waited} seconds in.`
                     : `${waited} seconds. Any moment now.`
                 : "Three a day, and nothing you type is stored."}

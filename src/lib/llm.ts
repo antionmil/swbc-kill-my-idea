@@ -20,6 +20,12 @@ export const MODELS = {
 
 export type Job = keyof typeof MODELS;
 
+/** Dollars per million tokens, from the published price list. */
+const RATES: Record<string, { in: number; out: number }> = {
+  "claude-haiku-4-5": { in: 1, out: 5 },
+  "claude-sonnet-5": { in: 2, out: 10 },
+};
+
 let _client: Anthropic | null = null;
 function client() {
   if (!_client) {
@@ -43,6 +49,10 @@ export type CompleteOpts = {
   /** Hard input ceiling. Throws rather than silently truncating - a truncated
    *  policy or pricing page produces a confident wrong answer. */
   maxInputChars?: number;
+  /** How hard the model thinks. Thinking tokens are billed as output and are
+   *  most of the bill on the prose path, so this is the first cost lever -
+   *  ahead of changing model, which costs quality. Measure before lowering. */
+  effort?: "low" | "medium" | "high" | "xhigh" | "max";
   /** Cache TTL in seconds. 0 disables caching (rare - prefer a short TTL). */
   ttl?: number;
   cachePrefix?: string;
@@ -52,6 +62,7 @@ export async function complete(prompt: string, opts: CompleteOpts = {}): Promise
   const {
     job = "cheap",
     system,
+    effort,
     maxTokens = 1600,
     maxInputChars = 60_000,
     ttl = 86_400,
@@ -68,8 +79,25 @@ export async function complete(prompt: string, opts: CompleteOpts = {}): Promise
       // No temperature: it is removed on Sonnet 5 and returns a 400.
       // No thinking on the cheap path; adaptive on the prose path.
       ...(job === "prose" ? { thinking: { type: "adaptive" as const } } : {}),
+      ...(effort ? { output_config: { effort } } : {}),
       messages: [{ role: "user" as const, content: prompt }],
     });
+    /* What the call cost, in the server log, every time.
+     *
+     * Without this line the only honest answer to "what does this cost to
+     * run" is a measurement taken by hand on a laptop. Thinking is billed as
+     * output and is most of the bill, so it is broken out separately. */
+    const u = res.usage;
+    const rate = RATES[MODELS[job]];
+    const cost = (u.input_tokens / 1e6) * rate.in + (u.output_tokens / 1e6) * rate.out;
+    const thinking = (u as { output_tokens_details?: { thinking_tokens?: number } })
+      .output_tokens_details?.thinking_tokens;
+    console.log(
+      `[llm] ${MODELS[job]}${effort ? ` effort=${effort}` : ""} in=${u.input_tokens} ` +
+        `out=${u.output_tokens}${thinking === undefined ? "" : ` think=${thinking}`} ` +
+        `cost=$${cost.toFixed(4)}`,
+    );
+
     return res.content
       .filter((b): b is Anthropic.TextBlock => b.type === "text")
       .map((b) => b.text)
