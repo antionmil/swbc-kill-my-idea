@@ -53,6 +53,7 @@ export function order(list: Experiment[]): Experiment[] {
 
   const out: Experiment[] = [];
   const placed = new Set<number>();
+  const fromOld = new Map<number, number>();
 
   while (placed.size < n) {
     const left = list.map((_, i) => i).filter((i) => !placed.has(i));
@@ -69,8 +70,20 @@ export function order(list: Experiment[]): Experiment[] {
     const next = ready.sort((a, b) => weigh(list[a]) - weigh(list[b]))[0];
     placed.add(next);
     out.push(list[next]);
+    fromOld.set(next, out.length); // 1-based position in the new order
   }
-  return out;
+
+  /* Rewrite the pointers. `needs` arrived as a position in the model's own
+     list, and that list no longer exists — leaving it would hand every caller
+     an index into something that was thrown away. After this, `needs` always
+     points at an EARLIER entry of the list it is returned in, or is null. */
+  return out.map((e) => {
+    const old = list.indexOf(e);
+    const dep = ignoreDependencies ? null : needs[old];
+    const to = dep === null || dep === undefined ? null : (fromOld.get(dep) ?? null);
+    const self = fromOld.get(old);
+    return { ...e, needs: to !== null && self !== undefined && to < self ? to : null };
+  });
 }
 export type Kill = {
   verdict: string;

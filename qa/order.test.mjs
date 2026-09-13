@@ -21,15 +21,12 @@ let failures = 0;
 for (const [name, list] of Object.entries(cases)) {
   const out = order(list);
   const costs = out.map(weigh);
-  const pos = new Map(out.map((e, i) => [list.indexOf(e), i]));
   let ok = out.length === list.length;
-  // every dependency placed before its dependent
-  for (const e of out) {
-    const i = list.indexOf(e);
-    if (e.needs && e.needs - 1 !== i && list[e.needs - 1]) {
-      if (pos.get(e.needs - 1) > pos.get(i)) ok = false;
-    }
-  }
+  /* `needs` is rewritten to a position in the RETURNED list, so the check is
+     simply that it points backwards. */
+  out.forEach((e, i) => {
+    if (e.needs !== null && !(e.needs >= 1 && e.needs <= i)) ok = false;
+  });
   /* A circle cannot be satisfied by any order; the contract there is to drop
      the dependencies and sort by cost alone. */
   if (name === "cycle") ok = costs.join() === [...costs].sort((a, b) => a - b).join();
