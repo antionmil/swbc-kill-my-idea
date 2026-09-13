@@ -1,3 +1,4 @@
+import { Here } from "@/components/Here";
 import { Killer } from "@/components/Killer";
 
 /* Static. Nothing on this page depends on a request, and the only thing that
@@ -7,9 +8,8 @@ export const dynamic = "force-static";
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-[720px] flex-col gap-12 px-5 py-12 sm:px-8 sm:py-16">
-      <header className="flex items-baseline justify-between gap-4">
+      <header>
         <span className="font-mono text-[11px] tracking-[0.22em] text-kill uppercase">Kill My Idea</span>
-        <span className="text-[11px] text-faint">day 11 of 26 · onedaybuilt</span>
       </header>
 
       <section className="flex flex-col gap-4">
@@ -45,12 +45,19 @@ export default function Home() {
         </p>
       </section>
 
-      <footer className="flex flex-col gap-3 border-t border-rule pt-7 text-[13px] leading-relaxed text-faint">
+      <footer className="flex flex-col gap-6 border-t border-rule pt-7 text-[13px] leading-relaxed text-faint">
+        <Here />
         <p className="max-w-[62ch]">
           Nothing you type is published, shown to anybody, or kept. There is no feed here and no
           account. The answer is held for a week against a one-way hash of the description, so an
           identical description returns instantly and costs nothing — the description itself is
           never written down.
+        </p>
+        <p className="max-w-[62ch]">
+          The counts above are taken without putting anything on your device: no cookie, no
+          storage, no address. That is also why only the first one counts people — with nothing
+          kept, there is no honest way to tell a returning reader from a new one, so the other two
+          count visits and say so.
         </p>
         <p>
           <a href="https://onedaybuilt.com" className="text-kill underline-offset-4 hover:underline">

@@ -24,11 +24,22 @@ Rules, all binding:
 - Write like someone who has run these experiments. Concrete nouns, no consultant register, no hedging, no "consider".
 - If the input is not an idea — a greeting, a test, an insult, gibberish — set "refused" to a one-sentence reply saying so, and return no experiments.
 
+Two closing fields:
+- "summary": one or two sentences saying what the idea actually is, in plainer words than the description used. A restatement, not a verdict and not advice. Somebody who reads only this should be able to repeat the idea back.
+- "sharper": ONE narrower version of the idea that the same experiments would have an easier time proving. Name the specific change and, in the same breath, why it is easier to prove — a named customer, a named moment, a smaller promise. Never "niche down", never "talk to more users", never a second idea in disguise. If the idea is already as tightly aimed as it can be, set it to null and do not invent one.
+
 Return ONLY minified JSON, no code fence:
-{"verdict":string,"assumption":string,"experiments":[{"action":string,"hours":number,"money":number,"kills":string}],"refused":string|null}`;
+{"verdict":string,"assumption":string,"experiments":[{"action":string,"hours":number,"money":number,"kills":string}],"summary":string,"sharper":string|null,"refused":string|null}`;
 
 export type Experiment = { action: string; hours: number; money: number; kills: string };
-export type Kill = { verdict: string; assumption: string; experiments: Experiment[] };
+export type Kill = {
+  verdict: string;
+  assumption: string;
+  experiments: Experiment[];
+  summary: string;
+  /** null when the idea is already aimed as tightly as it can be */
+  sharper: string | null;
+};
 
 export class NotAnIdea extends Error {}
 
@@ -64,7 +75,16 @@ function parse(raw: string): Kill {
   const verdict = str(data.verdict);
   if (!verdict || experiments.length < 3) throw new Error("The model returned an incomplete answer.");
 
-  return { verdict, assumption: str(data.assumption), experiments };
+  const sharper = str(data.sharper);
+  return {
+    verdict,
+    assumption: str(data.assumption),
+    experiments,
+    summary: str(data.summary),
+    /* The model is told to return null rather than invent one. It sometimes
+       returns the string "null" instead, which would print on the page. */
+    sharper: sharper && sharper.toLowerCase() !== "null" ? sharper : null,
+  };
 }
 
 /* max_tokens has to clear the thinking budget as well as the answer.

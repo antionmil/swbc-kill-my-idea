@@ -41,11 +41,33 @@ export function Report({ idea, data }: { idea: string; data: Kill }) {
       </table>
 
       {data.assumption ? (
-        <footer className="border-t border-rule pt-5">
+        <div className="border-t border-rule pt-5">
           <p className="font-mono text-[11px] tracking-[0.18em] text-faint uppercase">
             It all rests on this
           </p>
           <p className="mt-1.5 font-display text-[17px] leading-relaxed text-muted">{data.assumption}</p>
+        </div>
+      ) : null}
+
+      {data.summary || data.sharper ? (
+        <footer className="flex flex-col gap-6 border-t border-rule pt-5">
+          {data.summary ? (
+            <div>
+              <p className="font-mono text-[11px] tracking-[0.18em] text-faint uppercase">
+                The idea, in plain words
+              </p>
+              <p className="mt-1.5 font-display text-[17px] leading-relaxed">{data.summary}</p>
+            </div>
+          ) : null}
+
+          {data.sharper ? (
+            <div className="border-l-[3px] border-kill pl-4">
+              <p className="font-mono text-[11px] tracking-[0.18em] text-kill uppercase">
+                A sharper version
+              </p>
+              <p className="mt-1.5 font-display text-[17px] leading-relaxed">{data.sharper}</p>
+            </div>
+          ) : null}
         </footer>
       ) : null}
     </article>
@@ -70,6 +92,9 @@ export function asMarkdown(idea: string, data: Kill) {
     ]),
     ``,
     `**It all rests on this.** ${data.assumption}`,
+    ``,
+    `**The idea, in plain words.** ${data.summary}`,
+    ...(data.sharper ? [``, `**A sharper version.** ${data.sharper}`] : []),
     ``,
     `killmyidea.onedaybuilt.com`,
   ];

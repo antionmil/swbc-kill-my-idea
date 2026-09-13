@@ -24,6 +24,39 @@ is live and charges $24 a validation with no free tier, and what it sells is a
 market report with a Kill / Weak / Go label on top. Nobody was selling the
 cheap disproof plan. That gap is the whole product.
 
+## What an answer costs
+
+Measured, not estimated: three runs of the real system prompt through
+`claude-sonnet-5` at $2 per million input tokens and $10 per million output.
+
+| | |
+|---|---|
+| Input | ~739 tokens |
+| Output | ~2,733 tokens, of which ~2,050 is thinking |
+| Per answer | **$0.029** |
+| Daily ceiling of 400 answers | **$11.52** |
+
+Thinking is most of the bill. The cache is the other half of the cost story: a
+description that has been asked before costs nothing and does not spend one of
+the visitor's three goes.
+
+## The three numbers at the foot of the page
+
+Counted without putting anything on the visitor's device — no cookie, no
+localStorage, no fingerprint, no IP address. The id is a random string made in
+memory when the page loads and forgotten when the tab closes.
+
+That choice has a price, and the page states it rather than hiding it: with no
+durable id there is no honest way to tell a returning reader from a new one,
+so only **here now** counts people. **This week** and **all time** count
+visits, and say so on the page. Calling them people would have been the easy
+lie.
+
+`presence` rows are swept after ten minutes, opportunistically on about one
+request in fifty, so no cron is load-bearing for it. The week and all-time
+figures are held for ten seconds per instance, because they barely move
+between heartbeats and every visitor beats every 45 seconds.
+
 ## Nothing is kept
 
 There is no feed, no account, and no stored result. The scaffold ships
@@ -53,6 +86,15 @@ increment is a single `INSERT .. ON CONFLICT DO UPDATE`. Without the
 uniqueness there is no conflict to catch, every count comes back as 1, and
 both limits silently never fire. That is day 1's rate limiter, which compiled,
 deployed, and did nothing.
+
+## What comes back
+
+A verdict of at most fifteen words, five experiments ordered by cost, the
+assumption underneath, and then two closing fields: the idea restated in plain
+words, and one sharper version of it — a specific narrower target, never
+"niche down". `sharper` is allowed to be null when the idea is already aimed
+as tightly as it can be, and the prompt says so explicitly, because a model
+asked for advice will always produce advice.
 
 ## Model
 

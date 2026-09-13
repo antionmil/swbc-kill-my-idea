@@ -39,3 +39,28 @@ export const events = pgTable(
   },
   (t) => [index("events_day_idx").on(t.day)],
 );
+
+/* Counters for the three numbers at the foot of the page.
+ *
+ * NOTHING IS WRITTEN TO THE VISITOR'S DEVICE. No cookie, no localStorage, no
+ * fingerprint, no IP. The id below is a random string made in memory when the
+ * page loads and forgotten when the tab closes, which is all "who is here
+ * right now" needs — and it keeps the site outside consent-banner territory.
+ *
+ * The cost of that choice is stated on the page rather than hidden: with no
+ * durable id, the week and all-time figures count VISITS, not people. Calling
+ * them people would be the easy lie. */
+export const presence = pgTable(
+  "presence",
+  {
+    sid: text("sid").primaryKey(), // random, per page load, never stored client-side
+    last_seen: timestamp("last_seen", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("presence_seen_idx").on(t.last_seen)],
+);
+
+/** One row per day, incremented once per page load. */
+export const hits = pgTable("hits", {
+  day: text("day").primaryKey(), // YYYY-MM-DD
+  n: integer("n").notNull().default(0),
+});
